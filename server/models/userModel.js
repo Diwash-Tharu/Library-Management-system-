@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true,
+        //  here slect fasle is writen for the security purpose bcause if we set select:true then it will return the password in the response and it is not good for security purpose so we set select:false so that it will not return the password in the response.
         select:false,
 
     },
