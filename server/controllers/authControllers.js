@@ -24,6 +24,20 @@ export const register = catchAsyncError(async(req, res, next)=>{
             return next(new ErrorHandler("You have exceeded the maximum number of registration attempts. Please try again later.", 400));
         }
 
+        if(password.length <8 || password.length>16){
+            return next(new ErrorHandler("Password must be between 8 and 16 characters", 400));
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await User.create({
+            name,
+            email,
+            password:hashedPassword
+        });
+        const verificationCode = await user.generateVerificationCode();
+        //  these will help to save the user in the database and also will send the verification code to the user's email address
+        await user.save();
+        sendVerificationEmail(user.email, verificationCode, res);
+
     }catch(err){
 
     }
