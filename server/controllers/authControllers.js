@@ -4,6 +4,7 @@ import {catchAsyncError} from "../middlewares/cathAsyncError.js"
 import {User} from "../models/userModel.js";
 import bcrypt from "bcrypt"
 import crypto from "crypto"
+import { sendVerificationCode } from "../utils/sendVerificationCode.js";
 
 export const register = catchAsyncError(async(req, res, next)=>{
     try{
@@ -36,7 +37,7 @@ export const register = catchAsyncError(async(req, res, next)=>{
         const verificationCode = await user.generateVerificationCode();
         //  these will help to save the user in the database and also will send the verification code to the user's email address
         await user.save();
-        sendVerificationEmail(user.email, verificationCode, res);
+        sendVerificationCode(user.email, verificationCode, res);
 
     }catch(err){
 
