@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import  jwt from "jsonwebToken";
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -27,7 +28,7 @@ const userSchema = new mongoose.Schema({
     },
     accountVerified:{
         type:Boolean,
-        default:false,
+        default:true,
     },
     borrowedBooks:[
         {
@@ -60,16 +61,33 @@ const userSchema = new mongoose.Schema({
 },{timestamps:true});
 
 // generateVerificationCode
-userSchema.methods.generateVerificationCode = function(){
-    function generateRandomFiveDigitNumber(){
-        const firstDigit = Math.floor(Math.random() *9)+1; // Generate a random number between 1 and 9 for the first digit
-        const remainingDigits= Math.floor(Math.random() * 10000).toString().padStart(4, "0"); // Generate a random number between 0 and 9999 for the remaining digits and pad with leading zeros if necessary
-        return parseInt(firstDigit + remainingDigits); // Concatenate the first digit and remaining digits and convert to an integer}
+// userSchema.methods.generateVerificationCode = function(){
+//     function generateRandomFiveDigitNumber(){
+//         const firstDigit = Math.floor(Math.random() *9)+1; // Generate a random number between 1 and 9 for the first digit
+//         const remainingDigits= Math.floor(Math.random() * 10000).toString().padStart(4, "0"); // Generate a random number between 0 and 9999 for the remaining digits and pad with leading zeros if necessary
+//         return parseInt(firstDigit + remainingDigits); // Concatenate the first digit and remaining digits and convert to an integer}
 
+// }
+// const verificationCodes = generateRandomFiveDigitNumber();
+// thise.verificationCode = verificationCodes; 
+// this.verificationCodeExpire = Date.now() + 10 * 60 * 1000; // Set the expiration time to 10 minutes from now
+// return verificationCodes;
+
+
+userSchema.methods.generateVerificationCode = function () {
+    const code = Math.floor(10000 + Math.random() * 90000);
+
+    this.verificationCode = code;
+    this.verificationCodeExpire = new Date(
+        Date.now() + 10 * 60 * 1000
+    );
+
+    return code;
 }
-const verificationCodes = generateRandomFiveDigitNumber();
-thise.verificationCode = verificationCodes; 
-this.verificationCodeExpire = Date.now() + 10 * 60 * 1000; // Set the expiration time to 10 minutes from now
-return verificationCodes;
+
+userSchema.methods.generateToken = function(){
+    return jwt.sign({id:this._id}, process.env.JWT_SECRET,{
+        expiresIn:process.env.JWT_EXPIRE,
+    } )
 }
-const User = mongoose.model("User", userSchema) || mongoose.models.User;
+export const User = mongoose.model("User", userSchema) || mongoose.models.User;
