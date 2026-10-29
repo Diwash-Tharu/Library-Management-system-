@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import  jwt from "jsonwebToken";
+import  jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -86,8 +86,12 @@ userSchema.methods.generateVerificationCode = function () {
 }
 
 userSchema.methods.generateToken = function(){
-    return jwt.sign({id:this._id}, process.env.JWT_SECRET,{
-        expiresIn:process.env.JWT_EXPIRE,
-    } )
+    return jwt.sign({id:this._id}, process.env.JWT_SECRET_KEY,
+        {
+        expiresIn:process.env.JWT_EXPIRE || "7d",
+        //    { expiresIn: process.env.JWT_EXPIRE || "7d" }
+    } 
+)
+   
 }
 export const User = mongoose.model("User", userSchema) || mongoose.models.User;

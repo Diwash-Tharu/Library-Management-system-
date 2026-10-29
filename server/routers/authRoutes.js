@@ -5,6 +5,7 @@ import { login, register } from "../controllers/authControllers.js";
 const router = express.Router();
 
 router.post("/register", register);
+// router.post("/verify",verifyOTP) ;
 router.post("/login", login);
 
 export default router;

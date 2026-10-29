@@ -5,7 +5,7 @@ import {User} from "../models/userModel.js";
 import bcrypt from "bcrypt"
 import crypto from "crypto"
 import { sendVerificationCode } from "../utils/sendVerificationCode.js";
-import { sendToken } from "../utils/sendToken.js";
+// import { sendToken } from "../utils/sendToken.js";
 
 export const register = catchAsyncError(async(req, res, next)=>{
     try{
@@ -41,14 +41,16 @@ export const register = catchAsyncError(async(req, res, next)=>{
            // Generate and assign the verification code
         const verificationCode = user.generateVerificationCode();
 
-        res.status(201).json({
-            success: true,
-            message: "User registered successfully",
-            user
-        });
+        // res.status(201).json({
+        //     success: true,
+        //     message: "User registered successfully",
+        //     user
+        // });
         //  these will help to save the user in the database and also will send the verification code to the user's email address
         await user.save();
         sendVerificationCode(user, verificationCode, res);
+        user.verificationCode = verificationCode;
+        // user.save();
 
 
 
@@ -62,63 +64,101 @@ export const register = catchAsyncError(async(req, res, next)=>{
 })
 
 
-export const verifyOTP = catchAsyncError(async(req, res, next)=>{
-    const {email, otp}= req.body;
 
-    if(!email || !otp){
-        return next(new ErrorHandler("Please enter all fields", 400));
-    }
-    try{
+// export const verifyOTP = catchAsyncError(async(req, res, next)=>{
+//      const {email, otp}= req.body;
+//      if(!email || !otp){
+//         return next(new ErrorHandler("Please enter all fields", 400));
+//     }
+//     try{
+//          const user = await User.findOne({email});
+//          if(!user){
+//             return next(new ErrorHandler("No user found with this email", 400));
+//          }
+//          sendToken(user, 200, "User verified successfully", res);
 
-        const userAllEnteries = await User.find({
-            email,
-            accountVerified:false
-        }).sort({ createdAt: -1 });
+//          console.log("User verified successfully:",sendToken);
 
-        if(userAllEnteries.length === 0){
-            return next(new ErrorHandler("No unverified user found with this email", 400));
-        }
-        if(!userAllEnteries){
-            return next(new ErrorHandler("No unverified user found with this email", 400));
-        }
+//     }
+//     catch(err){
+//         console.log("err in the token generation", err);
 
-        let user;
-        if(userAllEnteries.length >1 ){
-            user= userAllEnteries[0];
-            await User.deleteMany({
-                //  here thee auqety will tell me thata i need to delet aall the other entries of the user except the one that is being verified and also the account is not verified yet
-                _id:{$ne:user._id},
-                email,
-                accountVerified:false
-            })
+//     }
+
+// })
+
+
+// export const verifyOTP = catchAsyncError(async(req, res, next)=>{
+//     const {email, otp}= req.body;
+
+//     // Check if email and otp are provided
+
+//     if(!email || !otp){
+//         return next(new ErrorHandler("Please enter all fields", 400));
+//     }
+//     try{
+
+//         const userAllEnteries = await User.find({
+//             email,
+//             // accountVerified:false
+//         }).sort({ createdAt: -1 });
+
+//         if(userAllEnteries.length === 0){
+//             return next(new ErrorHandler("No unverified user found with this email", 400));
+//         }
+//         if(!userAllEnteries){
+//             return next(new ErrorHandler("No unverified user found with this email", 400));
+//         }
+
+//         let user;
+//         if(userAllEnteries.length >1 ){
+//             user= userAllEnteries[0];
+//             await User.deleteMany({
+//                 //  here thee auqety will tell me thata i need to delet aall the other entries of the user except the one that is being verified and also the account is not verified yet
+//                 _id:{$ne:user._id},
+//                 email,
+//                 // accountVerified:false
+//             })
         
-            }else{
-                user= userAllEnteries[0];
-            }
+//             }else{
+//                 user= userAllEnteries[0];
+//             }
 
-        if(user.verificationCode !== Number(otp)){
-            return next(new ErrorHandler("Invalid OTP", 400));
-        }
-
-        const currentTime= Date.now();
-
-        const verificationCodeExpore = new Date(user.verificationCodeExpire).getTime();
-        if(currentTime > verificationCodeExpore){
-            return next(new ErrorHandler("OTP has expired", 400));
-        }
-        user.accountVerified = true;
-        user.verificationCode = null;
-        user.verificationCodeExpire = null;
-        await user.save();
         
-        sendToken(user, 200, "User verified successfully", res);
-    }
+//         // console.log("User found for OTP verification:", user);
 
-    
-    catch(error){
-        return next(new ErrorHandler(error.message, 500));
-    }
-})
+//         // if(user.verificationCode !== Number(otp)){
+//         //     return next(new ErrorHandler("Invalid OTP", 400));
+//         // }
+        
+//         sendToken(user, 200, "User verified successfully", res);
+
+//         return res.status(200).json({
+//             success:true,
+//             message:"User verified successfully",
+//             user,
+//         })
+
+
+//         // const currentTime= Date.now();
+
+//         // const verificationCodeExpore = new Date(user.verificationCodeExpire).getTime();
+//         // if(currentTime > verificationCodeExpore){
+//         //     return next(new ErrorHandler("OTP has expired", 400));
+//         // }
+//         // // user.accountVerified = true;
+//         // user.verificationCode = null;
+//         // user.verificationCodeExpire = null;
+//         // await user.save();
+
+//     }
+
+
+//     catch(error){
+//         console.error("Error in verifyOTP:", error);
+//         return next(new ErrorHandler(error.message, 500));
+//     }
+// })
 
 
 
@@ -160,17 +200,12 @@ if (!isMatch) {
 }
 
 console.log("User logged in successfully:", user);
-// return res.status(statusCode).json({
-         
-//         success: true,
-//         message,
-//         token,
-//         user: {
-//             id: user._id,
-//             name: user.name,
-//             email: user.email,
-//             role: user.role,
-//         },})
-return sendToken(user, 200, "User logged in successfully", res);
+
+
+
+res.status(200).json({
+    success: true,
+    message: "User logged in successfully",
+    user,})
 
 })
