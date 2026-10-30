@@ -5,7 +5,7 @@ import {User} from "../models/userModel.js";
 import bcrypt from "bcrypt"
 import crypto from "crypto"
 import { sendVerificationCode } from "../utils/sendVerificationCode.js";
-// import { sendToken } from "../utils/sendToken.js";
+import { sendToken } from "../utils/sendToken.js";
 
 export const register = catchAsyncError(async(req, res, next)=>{
     try{
@@ -201,11 +201,23 @@ if (!isMatch) {
 
 console.log("User logged in successfully:", user);
 
+sendToken(user, 200, "User logged in successfully", res);
+
+// res.status(200).json({
+//     success: true,
+//     message: "User logged in successfully",
+//     user,})
+
+})
 
 
-res.status(200).json({
-    success: true,
-    message: "User logged in successfully",
-    user,})
+export const logout = catchAsyncError(async(res, req, next)=>{
+    // res.status(200).cookie("token", null, {
+    //     expires: new Date(Date.now()),
+    //     httpOnly:true,
+    // }).json({
+    //     success:true,
+    //     message:"User logged out successfully"
+    // })
 
 })
