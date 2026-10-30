@@ -6,6 +6,9 @@ import bcrypt from "bcrypt"
 import crypto from "crypto"
 import { sendVerificationCode } from "../utils/sendVerificationCode.js";
 import { sendToken } from "../utils/sendToken.js";
+import { sendEmail } from "../utils/sendEmail.js";
+import {generateForgotPasswordEmailTemplate} from "../utils/emailTemplates.js"
+
 
 export const register = catchAsyncError(async(req, res, next)=>{
     try{
@@ -220,4 +223,48 @@ export const logout = catchAsyncError(async(res, req, next)=>{
     //     message:"User logged out successfully"
     // })
 
+})
+
+
+export const getUser = catchAsyncError(async(req, res, next)=>{
+    //  here  req. user is being set in the authmiddleware from the token 
+    const user = req.user;
+    console.log("User retrieved successfully:", user);
+    res.status(200).json({
+        success:true,
+        // user
+    })
+})
+
+
+export const forgotPassword = catchAsyncError(async(req, res, next)=>{
+    const user = await User.findOne({email:req.body.email});
+    if(!user){
+        return next(new ErrorHandler("User not found", 404));
+    }
+
+    const reseatToken = user.getResetPasswordToken();
+    await user.save({validateBeforeSave: true});
+
+    const resetPasswordUrl= `${process.env.FRONTEND_URL}/password/reset/${reseatToken}`;
+
+    const message =  generateForgotPasswordEmailTemplate(resetPasswordUrl);
+    try{
+        await sendEmail({
+            email:user.email,
+            subject:"Reset Password (Bookworm Library Management System)",
+            message
+        })
+        res.status(200).json({
+            success: true,
+            message:`Email sent to ${user.email} successfully`
+        })
+
+    }catch(error){
+        user.resetPasswordToken= undefined;
+        user.resetPasswordExpire= undefined;
+        console.error("Error in forgotPassword:", error);
+        await user.save({validateBeforeSave: true});
+        return next(new ErrorHandler(error.message, 500));
+    }
 })

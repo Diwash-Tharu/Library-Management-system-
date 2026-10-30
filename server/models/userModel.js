@@ -85,6 +85,8 @@ userSchema.methods.generateVerificationCode = function () {
     return code;
 }
 
+
+//  here jyw singn in side that there is a id which store the user id and also there is a secret key 
 userSchema.methods.generateToken = function(){
     return jwt.sign({id:this._id}, process.env.JWT_SECRET_KEY,
         {
@@ -92,6 +94,5 @@ userSchema.methods.generateToken = function(){
         //    { expiresIn: process.env.JWT_EXPIRE || "7d" }
     } 
 )
-   
 }
 export const User = mongoose.model("User", userSchema) || mongoose.models.User;

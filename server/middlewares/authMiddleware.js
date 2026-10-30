@@ -16,8 +16,10 @@ export const isAuthenticated = catchAsyncError(async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    
+
     console.log("Decoded Token:", decoded);
+    //  here we can get he user id since while making the token we have used the user id as payload 
+    //  here the usse will store all the data in the from of jason file 
     req.user = await User.findById(decoded.id);
     next();
 })
