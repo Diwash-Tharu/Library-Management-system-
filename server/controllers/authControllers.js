@@ -273,3 +273,15 @@ export const forgotPassword = catchAsyncError(async(req, res, next)=>{
         return next(new ErrorHandler(error.message, 500));
     }
 })
+
+export const resetPassword = catchAsyncError(async(req, res, next)=>{
+    const {token}= req.params;
+    const reseatPasswordToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+        reseatPasswordToken,
+        reseatPasswordExpire:{$gt:Date.now()}
+    })
+    if(!user){
+        return next(new ErrorHandler("Reset password token is invalid or has expired", 400));
+    }
+})
