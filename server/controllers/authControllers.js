@@ -243,6 +243,7 @@ export const forgotPassword = catchAsyncError(async(req, res, next)=>{
         return next(new ErrorHandler("User not found", 404));
     }
 
+    console.log("User found for password reset:", user);
     const reseatToken = user.getResetPasswordToken();
     await user.save({validateBeforeSave: true});
 
@@ -284,4 +285,28 @@ export const resetPassword = catchAsyncError(async(req, res, next)=>{
     if(!user){
         return next(new ErrorHandler("Reset password token is invalid or has expired", 400));
     }
+
+    if(req.body.password !== req.body.confirmPassword){
+        return next(new ErrorHandler("Password does not match", 400));
+    }
+
+    if(
+    req.body.password.length < 8 || 
+    req.body.password.length > 16 || 
+    req.body.confirmPassword.length < 8 || 
+    req.body.confirmPassword.length > 16){
+        return next(new ErrorHandler("Password must be between 8 and 16 characters", 400));
+    }
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    user.password = hashedPassword;
+    //  now we do not required the resttoken and cookirs so we will set them to undefined
+    user.resetPasswordToken= undefined;
+    user.resetPasswordExpire= undefined;
+    await user.save();
+    sendToken(user, 200, "Password reset successfully", res);
+})
+
+export const updatePasseord = catchAsyncError(async(req, res, next)=>{
+    const user = await User.findById(req.user._id);
+    
 })
