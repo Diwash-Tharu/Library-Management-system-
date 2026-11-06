@@ -1,5 +1,5 @@
 import express from "express";
-import { login, register,logout,getUser,forgotPassword, resetPassword } from "../controllers/authControllers.js";
+import { login, register,logout,getUser,forgotPassword, resetPassword, updatePasseord } from "../controllers/authControllers.js";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 
 
@@ -12,6 +12,7 @@ router.post("/forgot-password", forgotPassword);
 router.get("/user", isAuthenticated, getUser);
 router.get("/logout", isAuthenticated,  logout);
 router.put("/password/reset/:token", resetPassword);
+router.put("/password/update",isAuthenticated, updatePasseord);
 
 
 

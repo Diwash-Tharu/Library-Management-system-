@@ -307,6 +307,33 @@ export const resetPassword = catchAsyncError(async(req, res, next)=>{
 })
 
 export const updatePasseord = catchAsyncError(async(req, res, next)=>{
-    const user = await User.findById(req.user._id);
-    
+    //  since while making the user schema we habe set the password to select false so we need to select it here by manually selecting it
+    const user = await User.findById(req.user._id).select("+password");
+    const {currentPassword, newPassword, confirmNewPassword} = req.body;
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+        return next(new ErrorHandler("Please enter all fields", 400));
+    }
+
+    const ispasswordMatched = await bcrypt.compare(currentPassword, user.password);
+    if(!ispasswordMatched){
+        return next(new ErrorHandler("Current password is incorrect", 400));
+    }
+    const isPassordMatched = await bcrypt.compare(newPassword, user.password);
+
+    if (isPassordMatched) {
+        return next(new ErrorHandler("New password cannot be the same as the current password", 400));
+    }
+    if(newPassword !== confirmNewPassword){
+        return next(new ErrorHandler("New password and confirm password do not match", 400));
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({
+        success:true,
+        message:"Password updated successfully"
+    })
+
+
 })
