@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import ErrorHandler from "./errorMiddlewares.js";
 import { User } from "../models/userModel.js";
 
+// catchAsyncError
+
 
 export const isAuthenticated = catchAsyncError(async (req, res, next) => {
     const { token } = req.cookies;
@@ -23,3 +25,16 @@ export const isAuthenticated = catchAsyncError(async (req, res, next) => {
     req.user = await User.findById(decoded.id);
     next();
 })
+
+
+//  here inlcude is a method which is used to check if the role of the user is present in the roles array or not
+//  basically  this is  a method as same as the inlcue in the python 
+export const isAuthorized = (...roles) => {
+    return (req, res, next)=>{
+        if(!roles.includes(req.user.role)){
+            return next(new ErrorHandler(`You are not allowed to access this resource (${req.user.role})`, 403));  
+        }
+        next();
+    }
+
+}
