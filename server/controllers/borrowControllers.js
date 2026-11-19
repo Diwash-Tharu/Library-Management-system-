@@ -114,10 +114,29 @@ export const recordBorrowedBook = catchAsyncError(async(req, res, next)=>{
         })
         
         export const getBorrowedBooksFroAdmin = catchAsyncError(async(req, res, next)=>{
-            
+            const { borrowedBooks } = req.user;
+            res.status(200).json({
+                success:true,
+                borrowedBooks,
+            });
+
         })
         
         
         export const borrowedBooks = catchAsyncError(async (req, res, next)=>{
+           
+
+                   const { borrowedBookss } = req.user;
+                   console.log(borrowedBookss)
+                //  these codw will give all the data sama as the sql auery in the select all from the Borrow table 
+                const borrowedBooks= await Borrow.find();
+                res.status(200).json({
+                    success:true,
+                    borrowedBooks
+                    
+                })
+                console.log("you have reach here")
+                console.log(borrowedBooks)
+            
         
         })
