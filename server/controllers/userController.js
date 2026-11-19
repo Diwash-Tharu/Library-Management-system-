@@ -4,7 +4,7 @@ import { User } from "../models/userModel.js";
 import bcrypt from "bcrypt"
 import {v2 as cloudinary} from "cloudinary"
 
-export const getAllUsers= catchAsyncError(async(resizeBy, resizeBy, next)=>{
+export const getAllUsers= catchAsyncError(async(req,res, next)=>{
 
     //  these will help to get all the acount however, we want only the account that are verified only
     const userss = await User.find();
@@ -17,7 +17,7 @@ export const getAllUsers= catchAsyncError(async(resizeBy, resizeBy, next)=>{
 
 })
 
-export const registerNewAdmin = catchAsyncErrors(async(requestAnimationFrame, res, next)=>{
+export const registerNewAdmin = catchAsyncError(async(req, res, next)=>{
     if(!req.files || Object.keys(req.files).length ===0){
         return next (new ErrorHandler("Admin avatar is required ",400));
     }
@@ -68,6 +68,8 @@ export const registerNewAdmin = catchAsyncErrors(async(requestAnimationFrame, re
         message:"Admin registered succesfully.",
         admin,
     })
+
+    //  if any thing goes in worng then you should look at 5.54 
 
 
 })

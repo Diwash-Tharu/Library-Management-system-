@@ -11,6 +11,7 @@ import borrowRouter from "./routers/borrowRouter.js"
 import userRouter from "./routers/userRouter.js"
 // import router from "./routers/authRoutes.js"
 import expressFileupload from "express-fileupload"
+import { notifyUsers } from "./services/notifyUsers.js";
 
 export const app = express();
 
@@ -42,6 +43,7 @@ app.use(cors({
     app.use("/api/v1/book", bookRouter);
     app.use("/api/v1/borrow", borrowRouter)
     app.use("/api/v1/user", userRouter)
-
+    
+notifyUsers()
 connectDB();
 app.use(errorMiddleware);
